@@ -97,18 +97,8 @@ fn input_handling(args: Vec<String>) -> Arguments
         _other => panic!("Incorrect format!"),
     }
 
-/*
-    arguments.style =
-        match arguments.style as &str {
-            "foreground" => "",
-            "colored"    => "",
-            "item"       => "",
-            "cursorItem" => "",
-            "simple"     => "",
-            other        => "",
-        }*/
 
-    let color: u8 =
+    let mut color: u8 =
         match &color as &str {
             "red"      => 31, // Red
             "green"    => 32, // Green
@@ -122,6 +112,17 @@ fn input_handling(args: Vec<String>) -> Arguments
             "b-white"  => 97, // Bright White
             _other      => 39, // Default
         };
+
+
+    match &style as &str {
+        "background" => {style = "  ".to_string(); color += 10;},
+        "foreground" => style = "  ".to_string(),
+        "item"       => style = " *\x1b[22m\x1b[39m".to_string(),
+        "cursorItem" => style = "=>\x1b[22m\x1b[39m".to_string(),
+        "simple"     => style = " >\x1b[22m\x1b[39m".to_string(),
+        _other        => panic!(),
+    };
+
     return Arguments{style, color};
 }
 
@@ -132,7 +133,7 @@ fn compose_menu(options: [&str; 10], arguments: Arguments) -> String
 loop{
         for i in 0..10 {
             if i == line {
-                println!("\x1b[{1}m=>\x1b[22m\x1b[39m {}", options[i as usize], arguments.color);
+                println!("\x1b[{1}m{2} {}\x1b[22m\x1b[39m", options[i as usize], arguments.color, arguments.style);
             }else{
                 println!("   {}", options[i as usize]);
             }
@@ -163,113 +164,3 @@ loop{
         if line == 67 {println!("{}", arguments.style);} else {}
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-fn main()
-{
-/*    let args: Vec<String> = env::args().collect();
-
-    let mut argument: String = Default::default();
-
-    match args.len()
-    {
-        0 => panic!("Actually impossible!"),
-        1 => {
-            print!("Especify the type of menu you want to try > ");
-            let _ = io::stdout().flush();
-            io::stdin()
-                .read_line(&mut argument)
-                .expect("Failed to read line!");
-            while argument == Default::default()
-            {
-                print!("You should especify type of menu you want to try > ");
-                io::stdin()
-                    .read_line(&mut argument)
-                    .expect("Failed to read line!");
-            }
-        },
-        2 => argument = args[1];,// help {name}
-        3.. => println!("Too many arguments, I only take one!"),
-        other => panic!("Ink what it could be!"),
-    }*/
-
-//    print!("\x1B[2J");
-
-
-        for _i in 1..12 {
-            print!("");
-            print!("\x1B[2K\x1B[A");
-        }
-
-    }
-    print!("Downloading .iso --> [");
-    for _ in 1..106 {print!("·");}
-    print!("]1 TB/s\n");
-    print!("Do you wanna install and reboot now? (y/n): ");
-    let mut reboot: String = Default::default();
-    let _ = io::stdout().flush();
-    io::stdin()
-        .read_line(&mut reboot)
-        .expect("Failed to reboot");
-    if reboot == "y\n" {
-        println!("\nrebooting...");
-    }else {
-        println!("\nSomething was wrong, rebooting...");
-    }
-
-    print!("\x1B[H");
-
-    print!("\x1B[2J");
-    thread::sleep(time::Duration::from_secs(7));
-
-    println!("you got scared, right?");
-}
-
-//    cursorItem(options);
-    /*
-    if argument == "recomendations" {
-    }else if argument == "foreground" {
-    }else if argument == "colored" {
-    }else if argument == "item" {
-    }else if argument == "cursorItem" {
-    }else if argument == "simple" {
-    }else if argument == "help" {
-    }else{
-    }*/
-
-fn recomendations()
-{
-    //
-}
-
-fn foreground()
-{
-    //
-}
-
-fn colored()
-{
-    //
-}
-
-fn item()
-{
-    //
-}
-
-fn cursorItem(options: [&str; 10])
-{
-}
-*/
