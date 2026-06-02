@@ -4,7 +4,7 @@ use std::{io, io::Write, env};
 
 struct Arguments{
     style: String,
-    color: u8,
+    color: String,
 }
 
 fn main()
@@ -70,10 +70,20 @@ fn input_handling(args: Vec<String>) -> Arguments
             let _ = io::stdout().flush();
             io::stdin().read_line(&mut style).expect("Failed to read style!");
 
+            while style == "\n" {
+                println!("Not a valid answer, try again!");
+                io::stdin().read_line(&mut style).expect("Failed to read style!");
+            }
+
             print!("Color > ");
 
             let _ = io::stdout().flush();
             io::stdin().read_line(&mut color).expect("Failed to read color!");
+
+            while style == "\n" {
+                println!("Not a valid answer, try again!");
+                io::stdin().read_line(&mut color).expect("Failed to read style!");
+            }
 
             style = style.trim().parse().expect("Failed to clean input!");
             color = color.trim().parse().expect("Failed to clean input!");
@@ -85,6 +95,11 @@ fn input_handling(args: Vec<String>) -> Arguments
 
             let _ = io::stdout().flush();
             io::stdin().read_line(&mut color).expect("Failed to read color!");
+
+            while style == "\n" {
+                println!("Not a valid answer, try again!");
+                io::stdin().read_line(&mut color).expect("Failed to read style!");
+            }
 
             style = args[1 as usize].trim().parse().expect("Failed to clean first argument!");
             color = color.trim().parse().expect("Failed to clean input!");
@@ -98,7 +113,7 @@ fn input_handling(args: Vec<String>) -> Arguments
     }
 
 
-    let mut color: u8 =
+    let mut color_n: u8 =
         match &color as &str {
             "red"      => 31, // Red
             "green"    => 32, // Green
@@ -113,16 +128,31 @@ fn input_handling(args: Vec<String>) -> Arguments
             _other      => 39, // Default
         };
 
+    let mut color: String = Default::default();
 
     match &style as &str {
-        "background" => {style = "  ".to_string(); color += 10;},
+        "background" => {
+            style = "  ".to_string();
+            if color_n == 31
+            || color_n == 32
+            || color_n == 33    // --> Bright colors.
+            || color_n == 37
+            || color_n == 91
+            || color_n == 92
+            || color_n == 93
+            || color_n == 97
+            || color_n == 39 {style += "\x1b[30m"} else {}
+            if color_n == 39 {color_n = 47} else {color_n += 10;}
+            color = color_n.to_string();
+        },
         "foreground" => style = "  ".to_string(),
         "item"       => style = " *\x1b[22m\x1b[39m".to_string(),
-        "cursorItem" => style = "=>\x1b[22m\x1b[39m".to_string(),
+        "bullet"     => style = "=>\x1b[22m\x1b[39m".to_string(),
         "simple"     => style = " >\x1b[22m\x1b[39m".to_string(),
-        _other        => panic!(),
+        _other       => panic!(),
     };
 
+    if style != "background" {color = color_n.to_string();} else {}
     return Arguments{style, color};
 }
 
@@ -133,7 +163,7 @@ fn compose_menu(options: [&str; 10], arguments: Arguments) -> String
 loop{
         for i in 0..10 {
             if i == line {
-                println!("\x1b[{1}m{2} {}\x1b[22m\x1b[39m", options[i as usize], arguments.color, arguments.style);
+                println!("\x1b[{1}m{2} {}\x1b[0m", options[i as usize], arguments.color, arguments.style);
             }else{
                 println!("   {}", options[i as usize]);
             }
