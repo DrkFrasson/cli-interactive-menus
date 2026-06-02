@@ -5,6 +5,7 @@ use std::{io, io::Write, env};
 struct Arguments{
     style: String,
     color: String,
+    alignment: String,
 }
 
 fn main()
@@ -59,6 +60,7 @@ fn input_handling(args: Vec<String>) -> Arguments
 {
     let mut style: String = Default::default();
     let mut color: String = Default::default();
+    let mut alignment: String = Default::default();
 
     match args.len() {
         0 => panic!(), // Should be unreachable;
@@ -85,8 +87,15 @@ fn input_handling(args: Vec<String>) -> Arguments
                 io::stdin().read_line(&mut color).expect("Failed to read style!");
             }
 
+            print!("Alignment > ");
+
+            let _ = io::stdout().flush();
+            io::stdin().read_line(&mut alignment).expect("Failed to read color!");
+            if alignment == "\n" {alignment = "n".to_string()} else {};
+
             style = style.trim().parse().expect("Failed to clean input!");
             color = color.trim().parse().expect("Failed to clean input!");
+            alignment = alignment.trim().parse().expect("Failed to clean input!");
         },
         2 => { // program [style]\n
             println!("You didn't defined the color!");
@@ -103,15 +112,20 @@ fn input_handling(args: Vec<String>) -> Arguments
 
             style = args[1 as usize].trim().parse().expect("Failed to clean first argument!");
             color = color.trim().parse().expect("Failed to clean input!");
+            alignment = "n".to_string();
         },
         3 => { // program [style] [color]\n
             style = args[1 as usize].trim().parse().expect("Failed to clean first argument!");
             color = args[2 as usize].trim().parse().expect("Failed to clean second argument!");
+            alignment = "n".to_string();
         },
-        4..1000 => println!("Too much arguments!"),
-        _other => panic!("Incorrect format!"),
+        4 => {
+            style = args[1 as usize].trim().parse().expect("Failed to clean first argument!");
+            color = args[2 as usize].trim().parse().expect("Failed to clean second argument!");
+            alignment = args[3 as usize].trim().parse().expect("Failed to clean second argument!");
+        }
+        5.. => println!("Too much arguments!"),
     }
-
 
     let mut color_n: u8 =
         match &color as &str {
@@ -153,17 +167,18 @@ fn input_handling(args: Vec<String>) -> Arguments
     };
 
     if style != "background" {color = color_n.to_string();} else {}
-    return Arguments{style, color};
+    return Arguments{style, color, alignment};
 }
 
 fn compose_menu(options: [&str; 10], arguments: Arguments) -> String
 {
     let mut line: u8 = 0;
 
+    let spacing: String = if arguments.alignment == "l" {"".to_string()} else if arguments.alignment == "r" {"  ".to_string()} else {" ".to_string()};
 loop{
         for i in 0..10 {
             if i == line {
-                println!("\x1b[{1}m{2} {}\x1b[0m", options[i as usize], arguments.color, arguments.style);
+                println!("\x1b[{1}m{2}{3}{}\x1b[0m", options[i as usize], arguments.color, arguments.style, spacing);
             }else{
                 println!("   {}", options[i as usize]);
             }
